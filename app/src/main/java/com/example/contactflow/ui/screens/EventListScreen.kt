@@ -110,7 +110,7 @@ fun EventListScreen(navController: NavController, events: List<Event>) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("All Events", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text("Yakınınızdaki Etkinlikler", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -177,7 +177,7 @@ fun HomeScreenHeader(searchQuery: String, onSearchQueryChange: (String) -> Unit,
                 shape = CircleShape
             )
             IconButton(
-                onClick = { /* TODO: Open filter */ },
+                onClick = { navController.navigate("filter") },
                 modifier = Modifier
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.secondaryContainer)

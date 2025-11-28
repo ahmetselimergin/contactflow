@@ -13,6 +13,7 @@ import com.example.contactflow.model.Event
 import com.example.contactflow.ui.screens.CreateEventScreen
 import com.example.contactflow.ui.screens.EventDetailScreen
 import com.example.contactflow.ui.screens.EventListScreen
+import com.example.contactflow.ui.screens.FilterScreen
 import com.example.contactflow.ui.screens.LoginScreen
 import com.example.contactflow.ui.screens.ProfileScreen
 import com.example.contactflow.ui.screens.SignupScreen
@@ -79,5 +80,6 @@ fun ContactFlowApp() {
         }
         composable("createEvent") { CreateEventScreen(navController = navController) }
         composable("profile") { ProfileScreen(navController = navController) }
+        composable("filter") { FilterScreen(navController = navController) }
     }
 }
