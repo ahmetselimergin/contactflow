@@ -1,5 +1,6 @@
 package com.example.contactflow.ui.screens
 
+import android.util.Patterns
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,24 +34,37 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.contactflow.R
+import com.example.contactflow.auth.handleGoogleAuthResult
+import com.example.contactflow.auth.rememberGoogleSignInLauncher
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val context = LocalContext.current
+
+    val isEmailValid = Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    val isFormValid = email.isNotBlank() && password.isNotBlank() && isEmailValid
+
+    val googleSignInLauncher = rememberGoogleSignInLauncher {
+        handleGoogleAuthResult(it, navController, context)
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Login") },
+                title = { Text(stringResource(R.string.login_title)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -70,14 +84,20 @@ fun LoginScreen(navController: NavController) {
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email Address") },
+                label = { Text(stringResource(R.string.email_address_label)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                isError = email.isNotEmpty() && !isEmailValid,
+                supportingText = {
+                    if (email.isNotEmpty() && !isEmailValid) {
+                        Text(stringResource(R.string.valid_email_prompt))
+                    }
+                }
             )
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Password") },
+                label = { Text(stringResource(R.string.password_label)) },
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 modifier = Modifier.fillMaxWidth()
@@ -86,32 +106,42 @@ fun LoginScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { /* TODO: Handle login */ navController.navigate("eventList") },
+                onClick = { 
+                    FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                navController.navigate("eventList")
+                            } else {
+                                android.widget.Toast.makeText(context, task.exception?.message, android.widget.Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                 },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
+                enabled = isFormValid
             ) {
-                Text("LOGIN", modifier = Modifier.padding(vertical = 8.dp))
+                Text(stringResource(R.string.login_button), modifier = Modifier.padding(vertical = 8.dp))
             }
             
             OutlinedButton(
-                onClick = { /* TODO: Handle Google Sign-in */ },
+                onClick = { googleSignInLauncher() },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onBackground)
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_google_logo), // You need to add this drawable
+                    painter = painterResource(id = R.drawable.ic_google_logo),
                     contentDescription = "Google Logo",
                     modifier = Modifier.size(20.dp),
                     tint = Color.Unspecified
                 )
-                Text("Login with Google", modifier = Modifier.padding(start = 8.dp))
+                Text(stringResource(R.string.login_with_google_button), modifier = Modifier.padding(start = 8.dp))
             }
             
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Don't have an account?")
+                Text(stringResource(R.string.dont_have_account_text))
                 TextButton(onClick = { navController.navigate("signup") }) {
-                    Text("Sign Up", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.signup_button_text), fontWeight = FontWeight.Bold)
                 }
             }
         }

@@ -19,6 +19,7 @@ import com.example.contactflow.ui.screens.ProfileScreen
 import com.example.contactflow.ui.screens.SignupScreen
 import com.example.contactflow.ui.screens.WelcomeScreen
 import com.example.contactflow.ui.theme.ContactFlowTheme
+import com.google.firebase.auth.FirebaseAuth
 
 object DataSource {
     val events = listOf(
@@ -63,7 +64,10 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun ContactFlowApp() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "welcome") { // Changed start destination
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    val startDestination = if (currentUser != null) "eventList" else "welcome"
+
+    NavHost(navController = navController, startDestination = startDestination) { // Changed start destination
         composable("welcome") { WelcomeScreen(navController = navController) }
         composable("login") { LoginScreen(navController = navController) }
         composable("signup") { SignupScreen(navController = navController) }

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "300914565509",
+    "firebase_url": "https://vue-chat-d20e1-default-rtdb.firebaseio.com",
+    "project_id": "vue-chat-d20e1",
+    "storage_bucket": "vue-chat-d20e1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:300914565509:android:31009e9149b15ae381e4ec",
+        "android_client_info": {
+          "package_name": "com.example.contactflow"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "300914565509-c5qu3bth1i8kk6prvm82qubbnfm6eedv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.contactflow",
+            "certificate_hash": "05a9335ea510ff6c34a76393bd5100486ea764b0"
+          }
+        },
+        {
+          "client_id": "300914565509-isrh2qhee0jsq49dg9uo1i67fs5dimps.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGyqiytRLQVPJO5ZKFDvG7VGD8_KmDBww"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "300914565509-isrh2qhee0jsq49dg9uo1i67fs5dimps.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

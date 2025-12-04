@@ -1,3 +1,24 @@
 <resources>
     <string name="app_name">Contact Flow</string>
+
+    <!-- Common -->
+    <string name="email_address_label">Email Address</string>
+    <string name="password_label">Password</string>
+    <string name="valid_email_prompt">Please enter a valid email</string>
+    <string name="auth_failed_message">Authentication failed.</string>
+
+    <!-- Login Screen -->
+    <string name="login_title">Login</string>
+    <string name="login_button">LOGIN</string>
+    <string name="login_with_google_button">Login with Google</string>
+    <string name="dont_have_account_text">Don\'t have an account?</string>
+
+    <!-- Signup Screen -->
+    <string name="signup_title">Sign Up</string>
+    <string name="full_name_label">Full Name</string>
+    <string name="phone_number_label">Phone Number</string>
+    <string name="signup_button">SIGN UP</string>
+    <string name="signup_with_google_button">Sign Up with Google</string>
+    <string name="already_have_account_text">Already have an account?</string>
+
 </resources>

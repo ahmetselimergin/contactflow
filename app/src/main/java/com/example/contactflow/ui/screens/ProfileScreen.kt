@@ -20,11 +20,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import coil.compose.AsyncImage
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(navController: NavController) {
+    val firebaseAuth = FirebaseAuth.getInstance()
+    val currentUser = firebaseAuth.currentUser
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -54,7 +59,7 @@ fun ProfileScreen(navController: NavController) {
                 contentScale = ContentScale.Crop
             )
 
-            Text("Gurjot S.", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+            Text(currentUser?.email ?: "Gurjot S.", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -71,6 +76,26 @@ fun ProfileScreen(navController: NavController) {
                 ProfileMenuItem(icon = Icons.Outlined.Language, text = "Language")
                 ProfileMenuItem(icon = Icons.Outlined.Person, text = "Profile Information")
                 ProfileMenuItem(icon = Icons.Outlined.History, text = "Event History")
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            if (currentUser != null) {
+                Button(
+                    onClick = {
+                        firebaseAuth.signOut()
+                        navController.navigate("login") {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("LOG OUT")
+                }
             }
         }
     }
