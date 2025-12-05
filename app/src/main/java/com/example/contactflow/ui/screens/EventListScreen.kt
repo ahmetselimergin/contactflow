@@ -29,19 +29,13 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,70 +46,100 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.contactflow.model.Event
+import com.example.contactflow.viewmodel.EventViewModel
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EventListScreen(navController: NavController, events: List<Event>) {
+fun EventListScreen(navController: NavController, eventViewModel: EventViewModel = viewModel()) {
+    val events by eventViewModel.events.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        floatingActionButton = {
-            FloatingActionButton(onClick = { navController.navigate("createEvent") }) {
-                Icon(Icons.Default.Add, contentDescription = "Create Event")
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                Text("Menu", modifier = Modifier.padding(16.dp))
+                HorizontalDivider()
+                NavigationDrawerItem(
+                    label = { Text("All Events") },
+                    selected = true,
+                    onClick = { scope.launch { drawerState.close() } }
+                )
+                NavigationDrawerItem(
+                    label = { Text("My Events") },
+                    selected = false,
+                    onClick = { 
+                        scope.launch { drawerState.close() }
+                        navController.navigate("myEvents") 
+                    }
+                )
             }
         }
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item {
-                HomeScreenHeader(searchQuery = searchQuery, onSearchQueryChange = { searchQuery = it }, navController = navController)
+    ) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            floatingActionButton = {
+                FloatingActionButton(onClick = { navController.navigate("createEvent") }) {
+                    Icon(Icons.Default.Add, contentDescription = "Create Event")
+                }
             }
+        ) { innerPadding ->
+            LazyColumn(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item {
+                    HomeScreenHeader(searchQuery = searchQuery, onSearchQueryChange = { searchQuery = it }, navController = navController, onMenuClick = { scope.launch { drawerState.open() } })
+                }
 
-            item {
-                Column {
-                    Row(
+                item {
+                    Column {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Popular Events 🔥", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            Text("View All", style = MaterialTheme.typography.bodySmall, color = Color.Gray, modifier = Modifier.clickable { })
+                        }
+
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            items(events) { event ->
+                                PopularEventCard(event = event, navController = navController)
+                            }
+                        }
+                    }
+                }
+
+                item {
+                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Popular Events 🔥", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Text("View All", style = MaterialTheme.typography.bodySmall, color = Color.Gray, modifier = Modifier.clickable { })
-                    }
-
-                    LazyRow(
-                        contentPadding = PaddingValues(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        items(events) { event ->
-                            PopularEventCard(event = event, navController = navController)
-                        }
+                        Text("Yakınınızdaki Etkinlikler", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     }
                 }
-            }
 
-            item {
-                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("Yakınınızdaki Etkinlikler", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                items(events.asReversed()) { event ->
+                    AllEventsCard(event, navController)
                 }
-            }
-
-            items(events.asReversed()) { event ->
-                AllEventsCard(event, navController)
             }
         }
     }
@@ -123,7 +147,7 @@ fun EventListScreen(navController: NavController, events: List<Event>) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenHeader(searchQuery: String, onSearchQueryChange: (String) -> Unit, navController: NavController) {
+fun HomeScreenHeader(searchQuery: String, onSearchQueryChange: (String) -> Unit, navController: NavController, onMenuClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -137,7 +161,7 @@ fun HomeScreenHeader(searchQuery: String, onSearchQueryChange: (String) -> Unit,
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { /* TODO: Open Drawer */ }) {
+            IconButton(onClick = onMenuClick) {
                 Icon(Icons.Default.Menu, contentDescription = "Menu")
             }
 

@@ -12,6 +12,7 @@
     <string name="login_button">LOGIN</string>
     <string name="login_with_google_button">Login with Google</string>
     <string name="dont_have_account_text">Don\'t have an account?</string>
+    <string name="signup_navigation_text">Sign Up</string>
 
     <!-- Signup Screen -->
     <string name="signup_title">Sign Up</string>
@@ -20,5 +21,18 @@
     <string name="signup_button">SIGN UP</string>
     <string name="signup_with_google_button">Sign Up with Google</string>
     <string name="already_have_account_text">Already have an account?</string>
+    <string name="login_navigation_text">Login</string>
+
+    <!-- Create Event Screen -->
+    <string name="create_event_title">Create Event</string>
+    <string name="event_name_label">Event Name</string>
+    <string name="event_date_label">Date</string>
+    <string name="event_time_label">Time</string>
+    <string name="event_location_label">Location</string>
+    <string name="event_description_label">Description</string>
+    <string name="event_image_url_label">Image URL</string>
+    <string name="create_button">CREATE</string>
+    <string name="event_created_successfully">Event created successfully</string>
+    <string name="event_creation_failed">Failed to create event</string>
 
 </resources>

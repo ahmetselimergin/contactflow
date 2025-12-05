@@ -3,86 +3,65 @@ package com.example.contactflow
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.contactflow.model.Event
 import com.example.contactflow.ui.screens.CreateEventScreen
 import com.example.contactflow.ui.screens.EventDetailScreen
 import com.example.contactflow.ui.screens.EventListScreen
 import com.example.contactflow.ui.screens.FilterScreen
 import com.example.contactflow.ui.screens.LoginScreen
+import com.example.contactflow.ui.screens.MyEventsScreen
 import com.example.contactflow.ui.screens.ProfileScreen
 import com.example.contactflow.ui.screens.SignupScreen
 import com.example.contactflow.ui.screens.WelcomeScreen
 import com.example.contactflow.ui.theme.ContactFlowTheme
+import com.example.contactflow.viewmodel.EventViewModel
 import com.google.firebase.auth.FirebaseAuth
 
-object DataSource {
-    val events = listOf(
-        Event(
-            id = 1,
-            name = "Global Rugby Challenge",
-            date = "Tue, 22 Oct",
-            time = "09:00 AM",
-            location = "Da Nang, Vietnam",
-            description = "An exciting rugby match between the top teams from around the globe. Don't miss this epic clash!",
-            imageUrl = "https://picsum.photos/seed/rugby/400/300",
-            organizer = "Albert Flores",
-            categories = listOf("Rugby", "Team sports"),
-            friendsGoing = 6
-        ),
-        Event(
-            id = 2,
-            name = "Android Dev Summit",
-            date = "Mon, 18 Nov",
-            time = "10:00 AM",
-            location = "Online",
-            description = "The biggest event for Android developers. Learn about the latest trends and technologies.",
-            imageUrl = "https://picsum.photos/seed/android/400/300",
-            organizer = "Google",
-            categories = listOf("Tech", "Android"),
-            friendsGoing = 125
-        )
-    )
-}
-
 class MainActivity : ComponentActivity() {
+
+    private val eventViewModel: EventViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             ContactFlowTheme {
-                ContactFlowApp()
+                ContactFlowApp(eventViewModel)
             }
         }
     }
 }
 
 @Composable
-fun ContactFlowApp() {
+fun ContactFlowApp(eventViewModel: EventViewModel) {
     val navController = rememberNavController()
     val currentUser = FirebaseAuth.getInstance().currentUser
     val startDestination = if (currentUser != null) "eventList" else "welcome"
 
-    NavHost(navController = navController, startDestination = startDestination) { // Changed start destination
+    NavHost(navController = navController, startDestination = startDestination) { 
         composable("welcome") { WelcomeScreen(navController = navController) }
         composable("login") { LoginScreen(navController = navController) }
         composable("signup") { SignupScreen(navController = navController) }
-        composable("eventList") { EventListScreen(navController = navController, events = DataSource.events) }
+        composable("eventList") { EventListScreen(navController = navController, eventViewModel = eventViewModel) }
         composable(
             route = "eventDetail/{eventId}",
-            arguments = listOf(navArgument("eventId") { type = NavType.IntType })
+            arguments = listOf(navArgument("eventId") { type = NavType.StringType })
         ) { backStackEntry ->
-            val eventId = backStackEntry.arguments?.getInt("eventId")
-            val event = DataSource.events.find { it.id == eventId }
+            val eventId = backStackEntry.arguments?.getString("eventId")
+            val event by eventViewModel.getEventById(eventId!!).collectAsState()
             if (event != null) {
-                EventDetailScreen(event = event, navController = navController)
+                EventDetailScreen(event = event!!, navController = navController)
             }
         }
         composable("createEvent") { CreateEventScreen(navController = navController) }
+        composable("myEvents") { MyEventsScreen(navController = navController, eventViewModel = eventViewModel) }
         composable("profile") { ProfileScreen(navController = navController) }
         composable("filter") { FilterScreen(navController = navController) }
     }

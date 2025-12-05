@@ -141,7 +141,7 @@ fun LoginScreen(navController: NavController) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.dont_have_account_text))
                 TextButton(onClick = { navController.navigate("signup") }) {
-                    Text(stringResource(R.string.signup_button_text), fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.signup_navigation_text), fontWeight = FontWeight.Bold)
                 }
             }
         }

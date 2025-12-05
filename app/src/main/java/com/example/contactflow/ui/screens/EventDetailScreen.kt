@@ -127,18 +127,13 @@ fun EventDetailScreen(event: Event, navController: NavController) {
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        InfoChip(Icons.Outlined.ConfirmationNumber, "Premium")
+                        if(event.isPaid) {
+                            InfoChip(Icons.Outlined.ConfirmationNumber, "${event.price} ${event.currency}")
+                        } else {
+                            InfoChip(Icons.Outlined.ConfirmationNumber, "Free")
+                        }
                         InfoChip(Icons.Outlined.AccessTime, event.time)
                         InfoChip(Icons.Outlined.CalendarToday, event.date)
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        OverlappingAvatars(friendsGoing = event.friendsGoing)
-                        Spacer(Modifier.width(16.dp))
-                        Text(
-                            text = "${event.friendsGoing}k People are Interested",
-                            color = Color.White.copy(alpha = 0.8f),
-                            fontWeight = FontWeight.SemiBold
-                        )
                     }
                 }
             }
@@ -167,10 +162,8 @@ fun EventDetailScreen(event: Event, navController: NavController) {
 
                 // Map
                 if (event.location != "Online") {
-                    val eventLocation = when (event.id) {
-                        1 -> LatLng(16.0544, 108.2022) // Da Nang
-                        else -> LatLng(37.4220, -122.0840) // Googleplex
-                    }
+                    val eventLocation = event.lat?.let { lat -> event.lng?.let { lng -> LatLng(lat, lng) } } ?: LatLng(37.4220, -122.0840)
+
                     val cameraPositionState = rememberCameraPositionState {
                         position = CameraPosition.fromLatLngZoom(eventLocation, 12f)
                     }
@@ -208,7 +201,11 @@ fun EventDetailScreen(event: Event, navController: NavController) {
                 .align(Alignment.BottomCenter)
                 .padding(16.dp)
         ) {
-            Text("Buy Ticket $120", modifier = Modifier.padding(vertical = 8.dp))
+            if(event.isPaid) {
+                Text("Buy Ticket ${event.price} ${event.currency}", modifier = Modifier.padding(vertical = 8.dp))
+            } else {
+                Text("Join The Event", modifier = Modifier.padding(vertical = 8.dp))
+            }
         }
     }
 }
@@ -221,24 +218,5 @@ fun InfoChip(icon: ImageVector, text: String) {
         Icon(icon, contentDescription = null, tint = Color.White.copy(alpha=0.8f), modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(8.dp))
         Text(text, color = Color.White, fontSize = 14.sp)
-    }
-}
-
-// Helper for overlapping avatars
-@Composable
-fun OverlappingAvatars(friendsGoing: Int) {
-    val seeds = listOf("a", "b", "c")
-    Box {
-      seeds.forEachIndexed { index, seed ->
-        AsyncImage(
-            model = "https://i.pravatar.cc/150?u=$seed",
-            contentDescription = "Friend",
-            modifier = Modifier
-                .padding(start = (index * 20).dp)
-                .size(32.dp)
-                .clip(CircleShape)
-                .border(1.dp, Color.Black, CircleShape)
-        )
-      }
     }
 }
